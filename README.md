@@ -1,12 +1,9 @@
-# 🗺️ LankaScore Heatmap
+#  LankaScore Heatmap
 
 > Interactive Z-Score visualization tool for Sri Lankan A/L students — see which university districts you qualify for in real time.
 
-[![CI](https://github.com/yourusername/lankascore-heatmap/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/lankascore-heatmap/actions)
 
-![LankaScore Screenshot](docs/screenshot.png)
-
-## ✨ Features
+##  Features
 
 | Feature | Description |
 |---|---|
