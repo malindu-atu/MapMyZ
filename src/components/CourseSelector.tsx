@@ -1,22 +1,28 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { COURSES, YEARS } from '../hooks/useZScore';
+import type { LucideIcon } from 'lucide-react';
+import {
+  Stethoscope, Smile, Wrench, Monitor, Building2, Scale,
+  PawPrint, Wheat, BarChart2, Palette, FlaskConical, Atom,
+  Dna, Ruler, BookOpen,
+} from 'lucide-react';
 
-const COURSE_ICONS: Record<string, string> = {
-  'Medicine': '🩺',
-  'Dentistry': '🦷',
-  'Engineering': '⚙️',
-  'Computer Science': '💻',
-  'Architecture': '🏛️',
-  'Law': '⚖️',
-  'Veterinary Science': '🐾',
-  'Agriculture': '🌾',
-  'Management': '📊',
-  'Arts': '🎨',
-  'Science': '🔬',
-  'Physical Science': '⚛️',
-  'Bio Science': '🧬',
-  'Quantity Surveying': '📐',
+const COURSE_ICONS: Record<string, LucideIcon> = {
+  'Medicine': Stethoscope,
+  'Dentistry': Smile,
+  'Engineering': Wrench,
+  'Computer Science': Monitor,
+  'Architecture': Building2,
+  'Law': Scale,
+  'Veterinary Science': PawPrint,
+  'Agriculture': Wheat,
+  'Management': BarChart2,
+  'Arts': Palette,
+  'Science': FlaskConical,
+  'Physical Science': Atom,
+  'Bio Science': Dna,
+  'Quantity Surveying': Ruler,
 };
 
 interface CourseSelectorProps {
@@ -52,7 +58,7 @@ export default function CourseSelector({
             }}
           >
             <span className="flex items-center gap-2">
-              <span className="text-base">{COURSE_ICONS[selectedCourse] ?? '📚'}</span>
+            {(() => { const Icon = COURSE_ICONS[selectedCourse] ?? BookOpen; return <Icon size={16} />; })()}
               <span className="text-sm font-medium text-slate-200">{selectedCourse}</span>
             </span>
             <motion.span
@@ -107,7 +113,7 @@ export default function CourseSelector({
                         (e.currentTarget as HTMLElement).style.background = 'transparent';
                     }}
                   >
-                    <span className="text-base">{COURSE_ICONS[course] ?? '📚'}</span>
+                    {(() => { const Icon = COURSE_ICONS[course] ?? BookOpen; return <Icon size={16} />; })()}
                     <span className="font-medium">{course}</span>
                   </button>
                 ))}

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { CheckCircle2, Lock } from 'lucide-react';
 
 interface FilterState {
   showEligible: boolean;
@@ -20,7 +21,7 @@ const CHIPS = [
     color: '#00ff88',
     bg: 'rgba(0,255,136,0.1)',
     border: 'rgba(0,255,136,0.3)',
-    icon: '✓',
+    icon: <CheckCircle2 size={13} />,
   },
   {
     key: 'showLocked' as keyof FilterState,
@@ -29,7 +30,7 @@ const CHIPS = [
     color: '#64748b',
     bg: 'rgba(100,116,139,0.1)',
     border: 'rgba(100,116,139,0.3)',
-    icon: '🔒',
+    icon: <Lock size={13} />,
   },
   {
     key: 'showNQC' as keyof FilterState,

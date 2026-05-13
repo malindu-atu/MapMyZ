@@ -1,5 +1,6 @@
 import { motion, useSpring, useTransform } from 'framer-motion';
 import { useEffect } from 'react';
+import { Map } from 'lucide-react';
 
 interface AppHeaderProps {
   qualifiedCount: number;
@@ -47,7 +48,7 @@ export default function AppHeader({
             boxShadow: '0 0 12px rgba(0,245,255,0.2)',
           }}
         >
-          <span className="text-base">🗺️</span>
+          <Map size={18} />
         </div>
         <div>
           <h1
