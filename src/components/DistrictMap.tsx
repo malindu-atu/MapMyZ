@@ -19,6 +19,19 @@ interface DistrictMapProps {
 const SRI_LANKA_BOUNDS: L.LatLngBoundsExpression = [[5.85, 79.50], [9.95, 81.95]];
 const SRI_LANKA_CENTER: L.LatLngExpression = [7.95, 80.75];
 
+/**
+ * The GeoJSON file spells the district "Moneragala" but all data sources
+ * (UGC PDFs, data.json) use "Monaragala". This map normalises the GeoJSON
+ * name so the eligibility lookup never silently misses it.
+ */
+const GEO_NAME_OVERRIDES: Record<string, string> = {
+  'Moneragala': 'Monaragala',
+};
+
+function normalizeGeoName(name: string): string {
+  return GEO_NAME_OVERRIDES[name] ?? name;
+}
+
 function MapUpdater({
   eligibilities,
   selectedDistrict,
@@ -45,8 +58,9 @@ function MapUpdater({
     const eligMap = new Map(eligibilities.map(e => [e.district, e]));
     geoJsonRef.current.eachLayer((layer: L.Layer) => {
       const geoLayer = layer as L.Path & { feature?: Feature };
-      const name = geoLayer.feature?.properties?.name as string;
-      if (!name) return;
+      const rawName = geoLayer.feature?.properties?.name as string;
+      if (!rawName) return;
+      const name = normalizeGeoName(rawName);
       const eligibility = eligMap.get(name);
       if (!eligibility) return;
       const isHovered = name === selectedDistrict;
@@ -78,7 +92,8 @@ export default function DistrictMap({
   }, []);
 
   const styleFeature = useCallback((feature?: Feature): L.PathOptions => {
-    const name = feature?.properties?.name as string;
+    const rawName = feature?.properties?.name as string;
+    const name = normalizeGeoName(rawName);
     const elig = eligibilitiesRef.current.find(e => e.district === name);
     if (!elig) return { fillColor: '#1e293b', fillOpacity: 0.7, color: '#334155', weight: 1 };
     const isDimmed = searchQuery.length > 0 && !filteredDistricts.has(name);
@@ -86,7 +101,8 @@ export default function DistrictMap({
   }, [selectedDistrict, searchQuery, filteredDistricts]);
 
   const onEachFeature = useCallback((feature: Feature, layer: L.Layer) => {
-    const name = feature.properties?.name as string;
+    const rawName = feature.properties?.name as string;
+    const name = normalizeGeoName(rawName);
     const polygon = layer as L.Polygon;
     polygon.on({
       mouseover: () => onDistrictHover(name),
@@ -101,7 +117,6 @@ export default function DistrictMap({
       zoom={7}
       minZoom={6}
       maxZoom={11}
-      // Restrict panning so users can't wander to India
       maxBounds={[[5.0, 78.8], [10.6, 83.2]]}
       maxBoundsViscosity={1.0}
       zoomControl={true}
