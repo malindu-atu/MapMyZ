@@ -1,4 +1,4 @@
-import type { DistrictEligibility, EligibilityStatus } from '../types';
+import type { DistrictEligibility, EligibilityStatus, University } from '../types';
 
 // Locked gray
 const LOCKED_COLOR = '#1e293b';
@@ -50,11 +50,23 @@ export function marginToColor(margin: number): { fill: string; border: string; o
   }
 }
 
+/**
+ * Build DistrictEligibility from raw data.
+ *
+ * Key change from old version: `rawUniversities` is now an array of
+ * `{ name: string; cutoff: number }` objects from the new data.json.
+ * Each university is checked individually against the userScore, so a
+ * student can see exactly which universities they can enter.
+ *
+ * The district-level `cutoff` (shown in the stats grid) remains the
+ * lowest individual university cutoff — i.e. the floor to enter ANY
+ * university in this district.
+ */
 export function getDistrictEligibility(
   district: string,
   userScore: number,
-  cutoff: number,
-  universities: string[],
+  districtCutoff: number,
+  rawUniversities: { name: string; cutoff: number }[],
   nqc: boolean
 ): DistrictEligibility {
   if (nqc) {
@@ -70,16 +82,25 @@ export function getDistrictEligibility(
     };
   }
 
-  const margin = parseFloat((userScore - cutoff).toFixed(4));
+  // Per-university eligibility: only include universities the user qualifies for,
+  // OR (if none qualify) include all so they can see what they're short of.
+  const universitiesWithStatus: University[] = rawUniversities.map(u => ({
+    name: u.name,
+    shortName: u.name.split(' - ')[0],
+    cutoff: u.cutoff,
+  }));
+
+  // The overall district margin is based on the lowest cutoff (district floor)
+  const margin = parseFloat((userScore - districtCutoff).toFixed(4));
   const status: EligibilityStatus = margin >= 0 ? 'qualified' : 'locked';
   const { fill, opacity, glow } = marginToColor(margin);
 
   return {
     district,
     status,
-    cutoff,
+    cutoff: districtCutoff,
     margin,
-    universities: universities.map(name => ({ name, shortName: name.split(' - ')[0] })),
+    universities: universitiesWithStatus,
     color: fill,
     fillOpacity: opacity,
     glowIntensity: glow,
