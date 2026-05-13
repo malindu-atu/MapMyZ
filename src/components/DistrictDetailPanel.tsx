@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import type { DistrictEligibility } from '../types';
+import type { DistrictEligibility, University } from '../types';
 import { formatScore, formatMargin, getStatusColor } from '../utils/colorLogic';
 import HistoricalTrendChart from './HistoricalTrendChart';
+import { CheckCircle2, Lock, Minus, GraduationCap } from 'lucide-react';
 
 interface DistrictDetailPanelProps {
   eligibility: DistrictEligibility | null;
@@ -19,6 +20,20 @@ export default function DistrictDetailPanel({
   const statusColor = eligibility ? getStatusColor(eligibility.status) : '#64748b';
   const isQualified = eligibility?.status === 'qualified';
   const isNQC = eligibility?.status === 'nqc';
+
+  // Split universities into qualified and locked for the current user score
+  const qualifiedUnis: University[] = [];
+  const lockedUnis: University[] = [];
+
+  if (eligibility && !isNQC) {
+    for (const uni of eligibility.universities) {
+      if (userScore >= uni.cutoff) {
+        qualifiedUnis.push(uni);
+      } else {
+        lockedUnis.push(uni);
+      }
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -55,7 +70,12 @@ export default function DistrictDetailPanel({
                     boxShadow: isQualified ? `0 0 8px ${statusColor}33` : 'none',
                   }}
                 >
-                  {isNQC ? 'NQC' : isQualified ? '✓ ELIGIBLE' : '✗ LOCKED'}
+                  {isNQC
+  ? <span className="flex items-center gap-1"><Minus size={11} /> NQC</span>
+  : isQualified
+  ? <span className="flex items-center gap-1"><CheckCircle2 size={11} /> ELIGIBLE</span>
+  : <span className="flex items-center gap-1"><Lock size={11} /> LOCKED</span>
+}
                 </span>
                 <button
                   onClick={onClose}
@@ -75,7 +95,7 @@ export default function DistrictDetailPanel({
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-lg p-2.5 text-center"
                   style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <div className="text-xs text-slate-500 mb-1">Cutoff</div>
+                  <div className="text-xs text-slate-500 mb-1">District Floor</div>
                   <div className="font-mono text-sm font-semibold text-slate-200">
                     {formatScore(eligibility.cutoff)}
                   </div>
@@ -101,30 +121,68 @@ export default function DistrictDetailPanel({
               </div>
             )}
 
-            {/* Universities */}
-            {!isNQC && eligibility.universities.length > 0 && (
+            {/* Universities you qualify for */}
+            {!isNQC && qualifiedUnis.length > 0 && (
               <div>
                 <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">
-                  {isQualified ? 'You\'re eligible at' : 'Would qualify at'}
+                  You qualify for ({qualifiedUnis.length})
                 </div>
                 <div className="space-y-1.5">
-                  {eligibility.universities.map((uni, i) => (
+                  {qualifiedUnis.map((uni, i) => (
                     <div
                       key={i}
-                      className="flex items-start gap-2 px-2.5 py-2 rounded-lg text-xs"
+                      className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-xs"
                       style={{
-                        background: isQualified
-                          ? 'rgba(0,255,136,0.05)'
-                          : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${isQualified ? 'rgba(0,255,136,0.12)' : 'rgba(255,255,255,0.06)'}`,
+                        background: 'rgba(0,255,136,0.05)',
+                        border: '1px solid rgba(0,255,136,0.12)',
                       }}
                     >
-                      <span className="mt-0.5 flex-shrink-0" style={{ color: isQualified ? '#00ff88' : '#475569' }}>
-                        {isQualified ? '🎓' : '🔒'}
+                      <div className="flex items-center gap-2 min-w-0">
+                      <GraduationCap size={14} className="flex-shrink-0" style={{ color: '#00ff88' }} />
+                        <span className="text-slate-300 leading-relaxed truncate">{uni.name}</span>
+                      </div>
+                      <span className="font-mono text-slate-500 flex-shrink-0" style={{ fontSize: '10px' }}>
+                        {formatScore(uni.cutoff)}
                       </span>
-                      <span className="text-slate-300 leading-relaxed">{uni.name}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Universities you don't yet qualify for */}
+            {!isNQC && lockedUnis.length > 0 && (
+              <div>
+                <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">
+                  Need higher score ({lockedUnis.length})
+                </div>
+                <div className="space-y-1.5">
+                  {lockedUnis.map((uni, i) => {
+                    const gap = uni.cutoff - userScore;
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-xs"
+                        style={{
+                          background: 'rgba(255,255,255,0.02)',
+                          border: '1px solid rgba(255,255,255,0.05)',
+                        }}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                        <Lock size={14} className="flex-shrink-0" style={{ color: '#475569' }} />
+                          <span className="text-slate-500 leading-relaxed truncate">{uni.name}</span>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <div className="font-mono" style={{ color: '#64748b', fontSize: '10px' }}>
+                            {formatScore(uni.cutoff)}
+                          </div>
+                          <div className="font-mono" style={{ color: '#ef4444', fontSize: '9px' }}>
+                            -{gap.toFixed(4)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
