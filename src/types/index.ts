@@ -1,12 +1,13 @@
 export interface University {
   name: string;
   shortName: string;
+  cutoff: number; 
 }
 
 export interface DistrictData {
   cutoff_zscore: number;
-  universities: University[];
-  nqc: boolean; // No Qualified Candidates
+  universities: { name: string; cutoff: number }[]; 
+  nqc: boolean; 
 }
 
 export interface YearData {
@@ -46,7 +47,7 @@ export interface DistrictEligibility {
   status: EligibilityStatus;
   cutoff: number;
   margin: number; // userScore - cutoff (can be negative)
-  universities: University[];
+  universities: University[]; // each uni now has its own cutoff
   color: string;
   fillOpacity: number;
   glowIntensity: number; // 0–1
