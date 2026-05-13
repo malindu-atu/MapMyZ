@@ -6,8 +6,10 @@ import { getDistrictEligibility } from '../utils/colorLogic';
 const data = rawData as unknown as ZScoreDatabase;
 
 export const COURSES = Object.keys(data);
-export const YEARS = ['2019', '2020', '2021', '2022', '2023'];
-export const LATEST_YEAR = '2023';
+
+// ← Updated: now includes 2020–2024
+export const YEARS = ['2020', '2021', '2022', '2023', '2024'];
+export const LATEST_YEAR = '2024';
 
 export function useAllDistricts(
   course: string,
@@ -23,7 +25,9 @@ export function useAllDistricts(
         district,
         userScore,
         info.cutoff_zscore,
-        (info.universities as unknown) as string[],
+        // ← Key fix: pass the {name, cutoff}[] objects directly instead of
+        //   casting to string[]. colorLogic.ts now expects this shape.
+        info.universities as { name: string; cutoff: number }[],
         info.nqc
       );
     });

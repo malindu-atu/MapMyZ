@@ -67,8 +67,9 @@ export default function HistoricalTrendChart({
 
   return (
     <div>
+      {/* ← Updated label */}
       <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">
-        Cutoff Trend (2019–2023)
+        Cutoff Trend (2020–2024)
       </div>
       <ResponsiveContainer width="100%" height={120}>
         <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
